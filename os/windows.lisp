@@ -8,13 +8,15 @@
   (with-output-to-string (s)
     (uiop:run-program '("WMIC" "Path" "Win32_Battery" "Get" "EstimatedChargeRemaining")
                       :output s
-                      :error-output :interactive)))
+                      :error-output :interactive
+                      :force-shell t)))
 
 (defun get-wmic-battery-status ()
   (with-output-to-string (s)
     (uiop:run-program '("WMIC" "Path" "Win32_Battery" "Get" "BatteryStatus")
                       :output s
-                      :error-output :interactive)))
+                      :error-output :interactive
+                      :force-shell t)))
 
 (defun parse-response (res)
   (let ((nl-pos (position #\Newline res)))
