@@ -29,7 +29,8 @@
           (with-output-to-string (s)
             (uiop:run-program `("cat" ,(format nil "/sys/class/power_supply/~A/status" battery))
                               :output s))))
-    (not (string= res "Discharging"))))
+    (not (string= "Discharging"
+                  (string-right-trim '(#\newline) res)))))
 
 (defun battery-info ()
   (let ((battery (first (batteries))))
