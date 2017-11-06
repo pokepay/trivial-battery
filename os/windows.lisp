@@ -6,26 +6,36 @@
 
 (defun get-wmic-battery-remaining ()
   (with-output-to-string (s)
+    #-sbcl
+    (uiop:run-program `(,(uiop:native-namestring #P"C:/Windows/System32/Wbem/WMIC.exe")
+                        "Path" "Win32_Battery" "Get" "EstimatedChargeRemaining")
+                      :output s
+                      :error-output :interactive)
+    #+sbcl
     (let ((process
-            (uiop:run-program `(,(uiop:native-namestring #P"C:/Windows/System32/Wbem/WMIC.exe")
-                                "Path" "Win32_Battery" "Get" "EstimatedChargeRemaining")
-                              :output s
-                              :error-output :interactive)))
+            (sb-ext:run-program (uiop:native-namestring #P"C:/Windows/System32/Wbem/WMIC.exe")
+                                '("Path" "Win32_Battery" "Get" "EstimatedChargeRemaining")
+                                :output s)))
       ;; Call process-status for Windows to close process handles.
       ;; ref. https://bugs.launchpad.net/sbcl/+bug/1724472
-      #+sbcl (sb-ext:process-status process)
+      (sb-ext:process-status process)
       process)))
 
 (defun get-wmic-battery-status ()
   (with-output-to-string (s)
+    #-sbcl
+    (uiop:run-program `(,(uiop:native-namestring #P"C:/Windows/System32/Wbem/WMIC.exe")
+                        "Path" "Win32_Battery" "Get" "BatteryStatus")
+                      :output s
+                      :error-output :interactive)
+    #+sbcl
     (let ((process
-            (uiop:run-program `(,(uiop:native-namestring #P"C:/Windows/System32/Wbem/WMIC.exe")
-                                "Path" "Win32_Battery" "Get" "BatteryStatus")
-                              :output s
-                              :error-output :interactive)))
+            (sb-ext:run-program (uiop:native-namestring #P"C:/Windows/System32/Wbem/WMIC.exe")
+                                '("Path" "Win32_Battery" "Get" "BatteryStatus")
+                                :output s)))
       ;; Call process-status for Windows to close process handles.
       ;; ref. https://bugs.launchpad.net/sbcl/+bug/1724472
-      #+sbcl (sb-ext:process-status process)
+      (sb-ext:process-status process)
       process)))
 
 (defun parse-response (res)
