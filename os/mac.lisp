@@ -38,11 +38,15 @@
 
 (defun battery-info ()
   (let ((info (parse-xml (get-response-xml))))
-    `(("percentage". ,(if (cdr (assoc "FullyCharged" info :test #'string=))
-                          100
-                          (floor
-                           (* (/ (cdr (assoc "CurrentCapacity" info :test #'string=))
-                                 (cdr (assoc "MaxCapacity" info :test #'string=)))
-                              100))))
-      ("charging" . ,(or (cdr (assoc "FullyCharged" info :test #'string=))
-                         (cdr (assoc "IsCharging" info :test #'string=)))))))
+    `((("percentage". ,(if (cdr (assoc "FullyCharged" info :test #'string=))
+                           100
+                           (floor
+                            (* (/ (cdr (assoc "CurrentCapacity" info :test #'string=))
+                                  (cdr (assoc "MaxCapacity" info :test #'string=)))
+                               100))))
+       ("charging" . ,(or (cdr (assoc "FullyCharged" info :test #'string=))
+                          (cdr (assoc "IsCharging" info :test #'string=))))))))
+
+(defun battery-details (battery)
+  (declare (ignore battery))
+  (first (battery-info)))

@@ -50,5 +50,9 @@
   (not (eql (parse-response (get-wmic-battery-status)) 1)))
 
 (defun battery-info ()
-  `(("percentage" . ,(battery-percentage))
-    ("charging" . ,(battery-charging-p))))
+  `((("percentage" . ,(battery-percentage))
+     ("charging" . ,(battery-charging-p)))))
+
+(defun battery-details (battery)
+  (declare (ignore battery))
+  (first (battery-info)))
