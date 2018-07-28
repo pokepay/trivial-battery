@@ -17,23 +17,37 @@
                           (string= supply "BAT" :end1 3)))
                    (split-sequence #\Newline supplies :remove-empty-subseqs t))))
 
+(defun slurp-line (pathname)
+  (with-open-file (s pathname)
+    (read-line s)))
+
+(defun try-int (value)
+  (handler-case
+      (values (parse-integer value))
+    (error (e) (declare (ignore e)) value)))
+
 (defun battery-percentage (battery)
   (values
    (parse-integer
-    (with-output-to-string (s)
-      (uiop:run-program `("cat" ,(format nil "/sys/class/power_supply/~A/capacity" battery))
-                        :output s)))))
+    (slurp-line (format nil "/sys/class/power_supply/~A/capacity" battery)))))
 
 (defun battery-charging-p (battery)
-  (let ((res
-          (with-output-to-string (s)
-            (uiop:run-program `("cat" ,(format nil "/sys/class/power_supply/~A/status" battery))
-                              :output s))))
-    (not (string= "Discharging"
-                  (string-right-trim '(#\newline) res)))))
+  (not (string=
+        "Discharging"
+        (slurp-line (format nil "/sys/class/power_supply/~A/status" battery)))))
+
+(defun battery-details (battery)
+  (cons
+   (cons "name" battery)
+   (loop for f in (uiop:directory-files (format nil "/sys/class/power_supply/~A/" battery))
+      for name = (file-namestring f)
+      unless (string= "uevent" name)
+      collect (cons name (try-int (slurp-line f))))))
 
 (defun battery-info ()
-  (let ((battery (first (batteries))))
-    (when battery
-      `(("percentage" . ,(battery-percentage battery))
-        ("charging" . ,(battery-charging-p battery))))))
+  (mapcar
+   (lambda (battery)
+     `(("percentage" . ,(battery-percentage battery))
+       ("charging" . ,(battery-charging-p battery))
+       ("name" . ,battery)))
+   (batteries)))
