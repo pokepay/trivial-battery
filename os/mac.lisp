@@ -33,7 +33,7 @@
              (loop for (k v . rest) on key-values by #'cddr
                    collect (cons (third k)
                                  (normalize-value v)))))
-    (let ((key-values (nthcdr 2 (third (third (xmls:parse xml))))))
+    (let ((key-values (nthcdr 2 (third (third (xmls:parse-to-list xml))))))
       (parse-dict key-values))))
 
 (defun battery-info ()
